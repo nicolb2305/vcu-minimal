@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, vec};
 
 use serde::{Deserialize, Serialize};
 
@@ -77,6 +77,14 @@ pub struct LolChampSelectChampSelectSession {
     pub has_simultaneous_bans: bool,
     pub has_simultaneous_picks: bool,
     pub is_custom_game: bool,
+}
+
+impl LolChampSelectChampSelectSession {
+    pub fn champions(&self) -> Vec<Vec<Champion>> {
+        let my_team: Vec<_> = self.my_team.iter().map(|x| x.champion_id).collect();
+        let their_team: Vec<_> = self.their_team.iter().map(|x| x.champion_id).collect();
+        vec![my_team, their_team]
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -170,8 +178,8 @@ pub enum LolChampSelectChampSelectSwapState {
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LolChampSelectChampSelectBannedChampions {
-    pub my_team_bans: Vec<i32>,
-    pub their_team_bans: Vec<i32>,
+    pub my_team_bans: Vec<Champion>,
+    pub their_team_bans: Vec<Champion>,
     pub num_bans: i32,
 }
 

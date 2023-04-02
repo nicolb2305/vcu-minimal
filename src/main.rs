@@ -17,7 +17,6 @@ fn spawn_client_listener(mut client: WebSocketClient, tx: Sender<WebSocketRespon
     let async_block = async move {
         while let Some(Ok(Message::Text(v))) = client.socket.next().await {
             if let Ok(val) = serde_json::from_str::<WebSocketEvent>(&v) {
-                dbg!(&val);
                 tx.send(val.data).await.unwrap()
             }
         }
@@ -42,7 +41,16 @@ fn spawn_stdin_listener(tx: Sender<String>) {
 
 fn process_client_message(msg: WebSocketResponse) -> Vec<ChampSelectActorType> {
     match msg {
-        WebSocketResponse::ChampSelect(val) => val.data.actions.into_iter().flatten().collect(),
+        WebSocketResponse::ChampSelect(val) => {
+            let picks = &val
+                .data
+                .champions()
+                .iter()
+                .map(|x| x.iter().map(|y| y.to_string()).collect::<Vec<_>>())
+                .collect::<Vec<_>>();
+            dbg!(picks);
+            val.data.actions.into_iter().flatten().collect()
+        }
         _ => unimplemented!(),
     }
 }
@@ -108,7 +116,7 @@ async fn main() {
         tokio::select! {
             Some(msg) = rx_ws.recv() => {
                 actions = process_client_message(msg);
-                dbg!(&actions);
+                // dbg!(&actions);
             },
             Some(champion_name) = rx_stdin.recv() => {
                 process_stdin_message(&client, &champion_name, &actions).await
