@@ -46,12 +46,12 @@ pub struct LolChatFriendResource {
     pub lol: HashMap<String, String>,
 }
 
-#[derive(Deserialize_tuple, Serialize_tuple, Debug, Clone, Default)]
+#[derive(Deserialize_tuple, Serialize_tuple, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct WebSocketEvent<T: Serialize + for<'a> Deserialize<'a>> {
+pub struct WebSocketEvent {
     pub op_code: OpCode,
     pub event: String,
-    pub data: WebSocketData<T>,
+    pub data: WebSocketResponse,
 }
 
 #[derive(Deserialize_repr, Serialize_repr, Debug, Clone, Default)]
@@ -65,11 +65,26 @@ pub enum OpCode {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
+pub enum EventType {
+    Create,
+    #[default]
+    Update,
+    Delete,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct WebSocketData<T> {
     pub data: T,
-    pub event_type: String,
+    pub event_type: EventType,
     pub uri: String,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(untagged)]
+#[non_exhaustive]
+pub enum WebSocketResponse {
+    ChampSelect(WebSocketData<LolChampSelectChampSelectSession>),
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]

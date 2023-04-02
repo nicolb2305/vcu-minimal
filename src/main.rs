@@ -5,34 +5,26 @@ use tokio::sync::mpsc::{self, Sender};
 use tokio_tungstenite::tungstenite::Message;
 use vcu_minimal::{
     api::types::{
-        ChampSelectActorType, LolChampSelectChampSelectAction, LolChampSelectChampSelectSession,
-        WebSocketEvent,
+        ChampSelectActorType, LolChampSelectChampSelectAction, WebSocketEvent, WebSocketResponse,
     },
     client::ApiClient,
     ws::WebSocketClient,
 };
 
-fn spawn_client_listener(
-    mut client: WebSocketClient,
-    tx: Sender<WebSocketEvent<LolChampSelectChampSelectSession>>,
-) {
-    tokio::spawn(async move {
-        loop {
-            while let Some(msg) = client.socket.next().await {
-                let msg = msg.unwrap();
-                if let Message::Text(v) = msg {
-                    if !v.is_empty() {
-                        let val = serde_json::from_str(&v).unwrap();
-                        tx.send(val).await.unwrap();
-                    }
-                }
+fn spawn_client_listener(mut client: WebSocketClient, tx: Sender<WebSocketResponse>) {
+    let async_block = async move {
+        while let Some(Ok(Message::Text(v))) = client.socket.next().await {
+            if let Ok(val) = serde_json::from_str::<WebSocketEvent>(&v) {
+                dbg!(&val);
+                tx.send(val.data).await.unwrap()
             }
         }
-    });
+    };
+    tokio::spawn(async_block);
 }
 
 fn spawn_stdin_listener(tx: Sender<String>) {
-    tokio::spawn(async move {
+    let async_block = async move {
         loop {
             let stdin = std::io::stdin();
             let mut line_buf = String::new();
@@ -42,13 +34,15 @@ fn spawn_stdin_listener(tx: Sender<String>) {
                 tx.send(line).await.unwrap();
             }
         }
-    });
+    };
+    tokio::spawn(async_block);
 }
 
-fn process_client_message(
-    msg: WebSocketEvent<LolChampSelectChampSelectSession>,
-) -> Vec<ChampSelectActorType> {
-    msg.data.data.actions.into_iter().flatten().collect()
+fn process_client_message(msg: WebSocketResponse) -> Vec<ChampSelectActorType> {
+    match msg {
+        WebSocketResponse::ChampSelect(val) => val.data.actions.into_iter().flatten().collect(),
+        _ => todo!(),
+    }
 }
 
 async fn process_stdin_message(
@@ -131,6 +125,7 @@ async fn main() {
         tokio::select! {
             Some(msg) = rx_ws.recv() => {
                 actions = process_client_message(msg);
+                dbg!(&actions);
             },
             Some(champion_name) = rx_stdin.recv() => {
                 process_stdin_message(&client, champion_name, &actions).await
