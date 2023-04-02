@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
-use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -44,47 +42,6 @@ pub struct LolChatFriendResource {
     pub group_name: String,
     pub display_group_name: String,
     pub lol: HashMap<String, String>,
-}
-
-#[derive(Deserialize_tuple, Serialize_tuple, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct WebSocketEvent {
-    pub op_code: OpCode,
-    pub event: String,
-    pub data: WebSocketResponse,
-}
-
-#[derive(Deserialize_repr, Serialize_repr, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
-#[repr(u8)]
-pub enum OpCode {
-    Subscribe = 5,
-    Unsubscribe = 6,
-    #[default]
-    Update = 8,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Default)]
-pub enum EventType {
-    Create,
-    #[default]
-    Update,
-    Delete,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct WebSocketData<T> {
-    pub data: T,
-    pub event_type: EventType,
-    pub uri: String,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(untagged)]
-#[non_exhaustive]
-pub enum WebSocketResponse {
-    ChampSelect(WebSocketData<LolChampSelectChampSelectSession>),
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -269,40 +226,6 @@ pub struct LolLobbyTeamBuilderChampSelectAction {
     pub is_in_progress: bool,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(untagged)]
-pub enum ChampSelectActorType {
-    Option1(LolChampSelectChampSelectAction),
-    Option2(LolChampSelectLegacyChampSelectAction),
-    Option3(LolLobbyTeamBuilderChampSelectAction),
-}
-
-impl ChampSelectActorType {
-    pub fn cell_id(&self) -> i64 {
-        match self {
-            Self::Option1(v) => v.actor_cell_id,
-            Self::Option2(v) => v.actor_cell_id,
-            Self::Option3(v) => v.actor_cell_id,
-        }
-    }
-
-    pub fn id(&self) -> i64 {
-        match self {
-            Self::Option1(v) => v.id,
-            Self::Option2(v) => v.id,
-            Self::Option3(v) => v.id,
-        }
-    }
-
-    pub fn champion_id(&self) -> i32 {
-        match self {
-            Self::Option1(v) => v.champion_id,
-            Self::Option2(v) => v.champion_id,
-            Self::Option3(v) => v.champion_id,
-        }
-    }
-}
-
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LolChampSelectChampGridChampion {
@@ -335,4 +258,38 @@ pub struct LolChampSelectChampionSelection {
     pub pick_intented_by_me: bool,
     pub pick_intented_position: String,
     pub picked_by_other_or_banned: bool,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(untagged)]
+pub enum ChampSelectActorType {
+    Option1(LolChampSelectChampSelectAction),
+    Option2(LolChampSelectLegacyChampSelectAction),
+    Option3(LolLobbyTeamBuilderChampSelectAction),
+}
+
+impl ChampSelectActorType {
+    pub fn cell_id(&self) -> i64 {
+        match self {
+            Self::Option1(v) => v.actor_cell_id,
+            Self::Option2(v) => v.actor_cell_id,
+            Self::Option3(v) => v.actor_cell_id,
+        }
+    }
+
+    pub fn id(&self) -> i64 {
+        match self {
+            Self::Option1(v) => v.id,
+            Self::Option2(v) => v.id,
+            Self::Option3(v) => v.id,
+        }
+    }
+
+    pub fn champion_id(&self) -> i32 {
+        match self {
+            Self::Option1(v) => v.champion_id,
+            Self::Option2(v) => v.champion_id,
+            Self::Option3(v) => v.champion_id,
+        }
+    }
 }

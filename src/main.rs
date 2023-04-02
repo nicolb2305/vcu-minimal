@@ -4,8 +4,9 @@ use futures_util::StreamExt;
 use tokio::sync::mpsc::{self, Sender};
 use tokio_tungstenite::tungstenite::Message;
 use vcu_minimal::{
-    api::types::{
-        ChampSelectActorType, LolChampSelectChampSelectAction, WebSocketEvent, WebSocketResponse,
+    api::{
+        api_types::{ChampSelectActorType, LolChampSelectChampSelectAction},
+        ws_types::{SubscriptionType, WebSocketEvent, WebSocketResponse},
     },
     client::ApiClient,
     ws::WebSocketClient,
@@ -41,7 +42,7 @@ fn spawn_stdin_listener(tx: Sender<String>) {
 fn process_client_message(msg: WebSocketResponse) -> Vec<ChampSelectActorType> {
     match msg {
         WebSocketResponse::ChampSelect(val) => val.data.actions.into_iter().flatten().collect(),
-        _ => todo!(),
+        _ => unimplemented!(),
     }
 }
 
@@ -113,7 +114,7 @@ async fn main() {
 
     let mut ws_client = WebSocketClient::new().await;
     ws_client
-        .subscribe("OnJsonApiEvent_lol-champ-select_v1_session".to_string())
+        .subscribe(SubscriptionType::LolChampSelectV1Session)
         .await
         .unwrap();
 

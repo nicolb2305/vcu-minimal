@@ -5,6 +5,7 @@ use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::http::HeaderValue;
 use tokio_tungstenite::{tungstenite::Message, MaybeTlsStream, WebSocketStream};
 
+use crate::api::ws_types::SubscriptionType;
 use crate::utils::port_and_auth;
 
 pub struct WSClient {
@@ -108,7 +109,7 @@ impl WebSocketClient {
         Self { socket }
     }
 
-    pub async fn subscribe(&mut self, event: String) -> Result<(), Error> {
+    pub async fn subscribe(&mut self, event: SubscriptionType) -> Result<(), Error> {
         self.socket
             .send(Message::text(format!(r#"[5, "{}"]"#, event)))
             .await?;

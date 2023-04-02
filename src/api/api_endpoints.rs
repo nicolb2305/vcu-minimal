@@ -1,6 +1,6 @@
 use reqwest::Method;
 
-use crate::{api::types::*, client::ApiClient, client::ApiResult};
+use crate::{api::api_types::*, client::ApiClient, client::ApiResult};
 
 impl ApiClient {
     pub async fn get_lol_active_boosts_v1_active_boosts(
