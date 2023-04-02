@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
+use super::data::Champion;
+
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LolActiveBoostsActiveBoosts {
@@ -107,7 +109,7 @@ pub struct LolChampSelectMucJwtDto {
 #[serde(rename_all = "camelCase")]
 pub struct LolChampSelectChampSelectPlayerSelection {
     pub cell_id: i64,
-    pub champion_id: i32,
+    pub champion_id: Champion,
     pub selected_skin_id: i32,
     pub ward_skin_id: i64,
     pub spell1_id: u64,
@@ -176,7 +178,7 @@ pub struct LolChampSelectChampSelectBannedChampions {
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LolChampSelectBenchChampion {
-    pub champion_id: i32,
+    pub champion_id: Champion,
     pub is_priority: bool,
 }
 
@@ -192,7 +194,7 @@ pub struct LolChampSelectEntitledFeatureState {
 pub struct LolChampSelectLegacyChampSelectAction {
     pub id: i64,
     pub actor_cell_id: i64,
-    pub champion_id: i32,
+    pub champion_id: Champion,
     #[serde(rename = "type")]
     pub type_: String,
     pub completed: bool,
@@ -206,7 +208,7 @@ pub struct LolChampSelectLegacyChampSelectAction {
 pub struct LolChampSelectChampSelectAction {
     pub id: i64,
     pub actor_cell_id: i64,
-    pub champion_id: i32,
+    pub champion_id: Champion,
     #[serde(rename = "type")]
     pub type_: String,
     pub completed: bool,
@@ -218,7 +220,7 @@ pub struct LolChampSelectChampSelectAction {
 pub struct LolLobbyTeamBuilderChampSelectAction {
     pub id: i64,
     pub actor_cell_id: i64,
-    pub champion_id: i32,
+    pub champion_id: Champion,
     #[serde(rename = "type")]
     pub type_: String,
     pub completed: bool,
@@ -285,7 +287,7 @@ impl ChampSelectActorType {
         }
     }
 
-    pub fn champion_id(&self) -> i32 {
+    pub fn champion_id(&self) -> Champion {
         match self {
             Self::Option1(v) => v.champion_id,
             Self::Option2(v) => v.champion_id,

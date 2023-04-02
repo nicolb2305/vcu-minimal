@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::str::FromStr;
 
 use futures_util::StreamExt;
 use tokio::sync::mpsc::{self, Sender};
@@ -6,6 +6,7 @@ use tokio_tungstenite::tungstenite::Message;
 use vcu_minimal::{
     api::{
         api_types::{ChampSelectActorType, LolChampSelectChampSelectAction},
+        data::Champion,
         ws_types::{SubscriptionType, WebSocketEvent, WebSocketResponse},
     },
     client::ApiClient,
@@ -46,12 +47,8 @@ fn process_client_message(msg: WebSocketResponse) -> Vec<ChampSelectActorType> {
     }
 }
 
-async fn process_stdin_message(
-    client: &ApiClient,
-    mut msg: String,
-    actions: &[ChampSelectActorType],
-) {
-    msg = msg
+async fn process_stdin_message(client: &ApiClient, msg: &str, actions: &[ChampSelectActorType]) {
+    let msg: String = msg
         .to_lowercase()
         .chars()
         .filter(|c| !c.is_whitespace())
@@ -60,26 +57,11 @@ async fn process_stdin_message(
         .get_lol_champ_select_v1_session_my_selection()
         .await
         .unwrap();
-    let champions = client
-        .get_lol_champ_select_v1_all_grid_champions()
-        .await
-        .unwrap()
-        .into_iter()
-        .map(|x| {
-            (
-                x.name
-                    .to_lowercase()
-                    .chars()
-                    .filter(|c| !c.is_whitespace())
-                    .collect(),
-                x.id,
-            )
-        })
-        .collect::<HashMap<String, i32>>();
 
     if let Some(player) = actions.iter().find(|x| x.cell_id() == my_selection.cell_id) {
-        let action = match msg.as_str() {
-            "" => LolChampSelectChampSelectAction {
+        let champion = Champion::from_str(&msg);
+        let action = match champion {
+            Ok(Champion::None) => LolChampSelectChampSelectAction {
                 id: player.id(),
                 actor_cell_id: player.cell_id(),
                 champion_id: player.champion_id(),
@@ -87,15 +69,15 @@ async fn process_stdin_message(
                 completed: true,
                 is_ally_action: true,
             },
-            k if champions.contains_key(k) => LolChampSelectChampSelectAction {
+            Ok(champ) => LolChampSelectChampSelectAction {
                 id: player.id(),
                 actor_cell_id: player.cell_id(),
-                champion_id: *champions.get(&msg).unwrap(),
+                champion_id: champ,
                 type_: "pick".to_owned(),
                 completed: false,
                 is_ally_action: true,
             },
-            _ => return,
+            Err(_) => return,
         };
 
         client
@@ -129,7 +111,7 @@ async fn main() {
                 dbg!(&actions);
             },
             Some(champion_name) = rx_stdin.recv() => {
-                process_stdin_message(&client, champion_name, &actions).await
+                process_stdin_message(&client, &champion_name, &actions).await
             }
         }
     }
