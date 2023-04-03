@@ -517,8 +517,8 @@ impl Display for Champion {
             Zilean => "Zilean",
             Zoe => "Zoe",
             Zyra => "Zyra",
-            Unknown => "Unknown",
             None => "None",
+            Unknown => "Unknown",
         };
         write!(f, "{}", name)
     }
