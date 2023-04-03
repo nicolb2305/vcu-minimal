@@ -48,6 +48,7 @@ fn process_client_message(msg: WebSocketResponse) -> Vec<LolChampSelectChampSele
                 .iter()
                 .map(|x| x.iter().map(|y| y.to_string()).collect::<Vec<_>>())
                 .collect::<Vec<_>>();
+            dbg!(&val.data.bans);
             dbg!(picks);
             val.data.actions.into_iter().flatten().collect()
         }
