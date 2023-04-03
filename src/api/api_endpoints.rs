@@ -41,4 +41,14 @@ impl ApiClient {
         self.request_deserialize(Method::GET, url, Option::<&str>::None)
             .await
     }
+
+    pub async fn post_riotclient_kill_ux(&self) -> ApiResult<()> {
+        let url = "/riotclient/kill-ux";
+        self.request(Method::POST, url, Option::<&str>::None).await
+    }
+
+    pub async fn post_riotclient_launch_ux(&self) -> ApiResult<()> {
+        let url = "/riotclient/launch-ux";
+        self.request(Method::POST, url, Option::<&str>::None).await
+    }
 }

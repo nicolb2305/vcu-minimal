@@ -5,7 +5,7 @@ use tokio::sync::mpsc::{self, Sender};
 use tokio_tungstenite::tungstenite::Message;
 use vcu_minimal::{
     api::{
-        api_types::{ChampSelectActorType, LolChampSelectChampSelectAction},
+        api_types::LolChampSelectChampSelectAction,
         data::Champion,
         ws_types::{SubscriptionType, WebSocketEvent, WebSocketResponse},
     },
@@ -39,7 +39,7 @@ fn spawn_stdin_listener(tx: Sender<String>) {
     tokio::spawn(async_block);
 }
 
-fn process_client_message(msg: WebSocketResponse) -> Vec<ChampSelectActorType> {
+fn process_client_message(msg: WebSocketResponse) -> Vec<LolChampSelectChampSelectAction> {
     match msg {
         WebSocketResponse::ChampSelect(val) => {
             let picks = &val
@@ -55,7 +55,11 @@ fn process_client_message(msg: WebSocketResponse) -> Vec<ChampSelectActorType> {
     }
 }
 
-async fn process_stdin_message(client: &ApiClient, msg: &str, actions: &[ChampSelectActorType]) {
+async fn process_stdin_message(
+    client: &ApiClient,
+    msg: &str,
+    actions: &[LolChampSelectChampSelectAction],
+) {
     let msg: String = msg
         .to_lowercase()
         .chars()
@@ -66,30 +70,25 @@ async fn process_stdin_message(client: &ApiClient, msg: &str, actions: &[ChampSe
         .await
         .unwrap();
 
-    if let Some(player) = actions.iter().find(|x| x.cell_id() == my_selection.cell_id) {
+    if let Some(player) = actions
+        .iter()
+        .find(|x| x.actor_cell_id.unwrap() == my_selection.cell_id)
+    {
         let champion = Champion::from_str(&msg);
         let action = match champion {
             Ok(Champion::None) => LolChampSelectChampSelectAction {
-                id: player.id(),
-                actor_cell_id: player.cell_id(),
-                champion_id: player.champion_id(),
-                type_: "pick".to_owned(),
-                completed: true,
-                is_ally_action: true,
+                completed: Some(true),
+                ..Default::default()
             },
             Ok(champ) => LolChampSelectChampSelectAction {
-                id: player.id(),
-                actor_cell_id: player.cell_id(),
-                champion_id: champ,
-                type_: "pick".to_owned(),
-                completed: false,
-                is_ally_action: true,
+                champion_id: Some(champ),
+                ..Default::default()
             },
             Err(_) => return,
         };
 
         client
-            .patch_lol_champ_select_v1_session_actions_by_id(player.id(), action)
+            .patch_lol_champ_select_v1_session_actions_by_id(player.id.unwrap(), action)
             .await
             .unwrap();
     }
@@ -111,7 +110,7 @@ async fn main() {
     spawn_client_listener(ws_client, tx_ws);
     spawn_stdin_listener(tx_stdin);
 
-    let mut actions: Vec<ChampSelectActorType> = vec![];
+    let mut actions: Vec<LolChampSelectChampSelectAction> = vec![];
     loop {
         tokio::select! {
             Some(msg) = rx_ws.recv() => {

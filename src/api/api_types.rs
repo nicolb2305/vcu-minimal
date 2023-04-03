@@ -56,7 +56,7 @@ pub struct LolChampSelectChampSelectSession {
     pub their_team: Vec<LolChampSelectChampSelectPlayerSelection>,
     pub trades: Vec<LolChampSelectChampSelectTradeContract>,
     pub pick_order_swaps: Vec<LolChampSelectChampSelectSwapContract>,
-    pub actions: Vec<Vec<ChampSelectActorType>>,
+    pub actions: Vec<Vec<LolChampSelectChampSelectAction>>,
     pub bans: LolChampSelectChampSelectBannedChampions,
     pub local_player_cell_id: i64,
     pub is_spectating: bool,
@@ -199,41 +199,16 @@ pub struct LolChampSelectEntitledFeatureState {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct LolChampSelectLegacyChampSelectAction {
-    pub id: i64,
-    pub actor_cell_id: i64,
-    pub champion_id: Champion,
-    #[serde(rename = "type")]
-    pub type_: String,
-    pub completed: bool,
-    pub is_ally_action: bool,
-    pub is_in_progress: bool,
-    pub pick_turn: i32,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
 pub struct LolChampSelectChampSelectAction {
-    pub id: i64,
-    pub actor_cell_id: i64,
-    pub champion_id: Champion,
+    pub id: Option<i64>,
+    pub actor_cell_id: Option<i64>,
+    pub champion_id: Option<Champion>,
     #[serde(rename = "type")]
-    pub type_: String,
-    pub completed: bool,
-    pub is_ally_action: bool,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct LolLobbyTeamBuilderChampSelectAction {
-    pub id: i64,
-    pub actor_cell_id: i64,
-    pub champion_id: Champion,
-    #[serde(rename = "type")]
-    pub type_: String,
-    pub completed: bool,
-    pub is_ally_action: bool,
-    pub is_in_progress: bool,
+    pub type_: Option<String>,
+    pub completed: Option<bool>,
+    pub is_ally_action: Option<bool>,
+    pub is_in_progress: Option<bool>,
+    pub pick_turn: Option<i32>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -268,38 +243,4 @@ pub struct LolChampSelectChampionSelection {
     pub pick_intented_by_me: bool,
     pub pick_intented_position: String,
     pub picked_by_other_or_banned: bool,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(untagged)]
-pub enum ChampSelectActorType {
-    Option1(LolChampSelectChampSelectAction),
-    Option2(LolChampSelectLegacyChampSelectAction),
-    Option3(LolLobbyTeamBuilderChampSelectAction),
-}
-
-impl ChampSelectActorType {
-    pub fn cell_id(&self) -> i64 {
-        match self {
-            Self::Option1(v) => v.actor_cell_id,
-            Self::Option2(v) => v.actor_cell_id,
-            Self::Option3(v) => v.actor_cell_id,
-        }
-    }
-
-    pub fn id(&self) -> i64 {
-        match self {
-            Self::Option1(v) => v.id,
-            Self::Option2(v) => v.id,
-            Self::Option3(v) => v.id,
-        }
-    }
-
-    pub fn champion_id(&self) -> Champion {
-        match self {
-            Self::Option1(v) => v.champion_id,
-            Self::Option2(v) => v.champion_id,
-            Self::Option3(v) => v.champion_id,
-        }
-    }
 }
