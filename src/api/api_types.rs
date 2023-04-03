@@ -2,12 +2,12 @@ use std::{collections::HashMap, vec};
 
 use serde::{Deserialize, Serialize};
 
-use super::data::Champion;
+use super::data::{Champion, SummonerSpell};
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LolActiveBoostsActiveBoosts {
-    pub summoner_id: u64,
+    pub summoner_id: SummonerId,
     pub ip_boost_end_date: String,
     pub ip_boost_per_win_count: u32,
     pub ip_loyalty_boost: u32,
@@ -19,16 +19,20 @@ pub struct LolActiveBoostsActiveBoosts {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
+pub struct SummonerId(u64);
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct LolChatFriendResource {
-    pub summoner_id: u64,
+    pub summoner_id: SummonerId,
     pub id: String,
-    pub name: String,
-    pub pid: String,
-    pub puuid: String,
-    pub game_name: String,
-    pub game_tag: String,
-    pub icon: i32,
-    pub availability: String,
+    pub name: SummonerName,
+    pub pid: Pid,
+    pub puuid: Puuid,
+    pub game_name: GameName,
+    pub game_tag: GameTag,
+    pub icon: SummonerIcon,
+    pub availability: ChatAvailability,
     pub platform_id: String,
     pub patchline: String,
     pub product: String,
@@ -48,8 +52,43 @@ pub struct LolChatFriendResource {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
+pub enum ChatAvailability {
+    #[default]
+    Offline,
+    Chat,
+    Away,
+    Mobile,
+    Dnd,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct SummonerIcon(i32);
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct SummonerName(String);
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct GameName(String);
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct GameTag(String);
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Pid(String);
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Puuid(String);
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct LolChampSelectChampSelectSession {
-    pub game_id: u64,
+    pub game_id: GameId,
     pub timer: LolChampSelectChampSelectTimer,
     pub chat_details: LolChampSelectChampSelectChatRoomDetails,
     pub my_team: Vec<LolChampSelectChampSelectPlayerSelection>,
@@ -79,10 +118,14 @@ pub struct LolChampSelectChampSelectSession {
     pub is_custom_game: bool,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct GameId(u64);
+
 impl LolChampSelectChampSelectSession {
     pub fn champions(&self) -> Vec<Vec<Champion>> {
-        let my_team: Vec<_> = self.my_team.iter().map(|x| x.champion_id).collect();
-        let their_team: Vec<_> = self.their_team.iter().map(|x| x.champion_id).collect();
+        let my_team: Vec<_> = self.my_team.iter().map(|x| x.champion).collect();
+        let their_team: Vec<_> = self.their_team.iter().map(|x| x.champion).collect();
         vec![my_team, their_team]
     }
 }
@@ -95,6 +138,13 @@ pub struct LolChampSelectChampSelectTimer {
     pub phase: String,
     pub is_infinite: bool,
     pub internal_now_in_epoch_ms: u64,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum LolChampSelectPhase {
+    #[default]
+    BanPick,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -117,21 +167,30 @@ pub struct LolChampSelectMucJwtDto {
 #[serde(rename_all = "camelCase")]
 pub struct LolChampSelectChampSelectPlayerSelection {
     pub cell_id: i64,
-    pub champion_id: Champion,
-    pub selected_skin_id: i32,
-    pub ward_skin_id: i64,
-    pub spell1_id: u64,
-    pub spell2_id: u64,
+    #[serde(rename = "championId")]
+    pub champion: Champion,
+    pub selected_skin_id: SkinId,
+    pub ward_skin_id: WardSkinId,
+    pub spell1_id: SummonerSpell,
+    pub spell2_id: SummonerSpell,
     pub team: i32,
     pub assigned_position: String,
     pub champion_pick_intent: i32,
-    pub summoner_id: u64,
-    pub puuid: String,
+    pub summoner_id: SummonerId,
+    pub puuid: Puuid,
     pub entitled_feature_type: String,
     pub name_visibility_type: String,
-    pub obfuscated_summoner_id: u64,
-    pub obfuscated_puuid: String,
+    pub obfuscated_summoner_id: SummonerId,
+    pub obfuscated_puuid: Puuid,
 }
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct SkinId(i32);
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct WardSkinId(i32);
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -186,7 +245,8 @@ pub struct LolChampSelectChampSelectBannedChampions {
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LolChampSelectBenchChampion {
-    pub champion_id: Champion,
+    #[serde(rename = "championId")]
+    pub champion: Champion,
     pub is_priority: bool,
 }
 
@@ -202,9 +262,10 @@ pub struct LolChampSelectEntitledFeatureState {
 pub struct LolChampSelectChampSelectAction {
     pub id: Option<i64>,
     pub actor_cell_id: Option<i64>,
-    pub champion_id: Option<Champion>,
+    #[serde(rename = "championId")]
+    pub champion: Option<Champion>,
     #[serde(rename = "type")]
-    pub type_: Option<String>,
+    pub action_type: Option<String>,
     pub completed: Option<bool>,
     pub is_ally_action: Option<bool>,
     pub is_in_progress: Option<bool>,
@@ -214,9 +275,10 @@ pub struct LolChampSelectChampSelectAction {
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LolChampSelectChampGridChampion {
-    pub id: i32,
+    #[serde(rename = "id")]
+    pub champion: Champion,
     pub name: String,
-    pub square_portrait_path: String,
+    pub square_portrait_path: Path,
     pub free_to_play: bool,
     pub loyalty_reward: bool,
     pub xbox_g_p_reward: bool,
@@ -224,13 +286,40 @@ pub struct LolChampSelectChampGridChampion {
     pub owned: bool,
     pub rented: bool,
     pub disabled: bool,
-    pub roles: Vec<String>,
+    pub roles: Vec<LolChampSelectRoles>,
     pub mastery_points: i32,
     pub mastery_level: i32,
     pub mastery_chest_granted: bool,
     pub selection_status: LolChampSelectChampionSelection,
-    pub positions_favorited: Vec<String>,
+    pub positions_favorited: Vec<LolChampSelectPosition>,
 }
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum LolChampSelectPosition {
+    #[default]
+    Top,
+    Jungle,
+    Middle,
+    Bottom,
+    Support,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum LolChampSelectRoles {
+    #[default]
+    Mage,
+    Fighter,
+    Tank,
+    Assassin,
+    Support,
+    Marksman,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Path(String);
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]

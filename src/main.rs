@@ -82,7 +82,7 @@ async fn process_stdin_message(
                 ..Default::default()
             },
             Ok(champ) => LolChampSelectChampSelectAction {
-                champion_id: Some(champ),
+                champion: Some(champ),
                 ..Default::default()
             },
             Err(_) => return,
@@ -98,6 +98,10 @@ async fn process_stdin_message(
 #[tokio::main]
 async fn main() {
     let client = ApiClient::new().unwrap();
+    dbg!(client
+        .get_lol_champ_select_v1_all_grid_champions()
+        .await
+        .unwrap());
 
     let (tx_ws, mut rx_ws) = mpsc::channel(5);
     let (tx_stdin, mut rx_stdin) = mpsc::channel(5);
@@ -115,6 +119,7 @@ async fn main() {
     loop {
         tokio::select! {
             Some(msg) = rx_ws.recv() => {
+                dbg!(&msg);
                 actions = process_client_message(msg);
                 // dbg!(&actions);
             },

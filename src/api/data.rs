@@ -523,3 +523,56 @@ impl Display for Champion {
         write!(f, "{}", name)
     }
 }
+
+#[derive(Serialize_repr, Deserialize_repr, Debug, Default, Copy, Clone, PartialEq)]
+#[repr(u64)]
+#[non_exhaustive]
+pub enum SummonerSpell {
+    Cleanse = 1,
+    Exhaust = 3,
+    Flash = 4,
+    Backtrack = 5,
+    #[default]
+    Ghost = 6,
+    Heal = 7,
+    Smite = 11,
+    Teleport = 12,
+    Clarity = 13,
+    Ignite = 14,
+    Barrier = 21,
+    ToTheKing = 30,
+    PoroToss = 31,
+    Mark = 32,
+    MarkUrf = 39,
+    OdysseyTemp1 = 50,
+    Haste = 51,
+    OdysseyTemp2 = 52,
+    Placeholder = 54,
+    PlaceholderAndSmite = 55,
+    PrimalSmite = 4294967295,
+}
+
+impl Display for SummonerSpell {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use SummonerSpell::*;
+        let name = match self {
+            Cleanse => "Cleanse",
+            Exhaust => "Exhaust",
+            Flash => "Flash",
+            Ghost => "Ghost",
+            Heal => "Heal",
+            Smite => "Smite",
+            Teleport => "Teleport",
+            Clarity => "Clarity",
+            Ignite => "Ignite",
+            Barrier => "Barrier",
+            ToTheKing => "To the King!",
+            PoroToss => "Poro Toss",
+            Mark => "Mark",
+            MarkUrf => "Mark",
+            PrimalSmite => "Primal Smite",
+            _ => "",
+        };
+        write!(f, "{}", name)
+    }
+}
