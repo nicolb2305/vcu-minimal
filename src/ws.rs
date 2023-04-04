@@ -1,3 +1,4 @@
+#![allow(clippy::missing_errors_doc)]
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{SinkExt, StreamExt};
 use tokio::net::TcpStream;
@@ -87,13 +88,10 @@ impl WebSocketClient {
         let cert = native_tls::Certificate::from_pem(include_bytes!("../riotgames.pem"))?;
         let tls = native_tls::TlsConnector::builder()
             .add_root_certificate(cert)
-            .build()
-            .unwrap();
+            .build()?;
         let connector = tokio_tungstenite::Connector::NativeTls(tls);
 
-        let mut url = format!("wss://127.0.0.1:{port}")
-            .into_client_request()
-            .unwrap();
+        let mut url = format!("wss://127.0.0.1:{port}").into_client_request()?;
         {
             let headers = url.headers_mut();
             headers.insert(
@@ -103,9 +101,7 @@ impl WebSocketClient {
         }
 
         let (socket, _) =
-            tokio_tungstenite::connect_async_tls_with_config(url, None, Some(connector))
-                .await
-                .unwrap();
+            tokio_tungstenite::connect_async_tls_with_config(url, None, Some(connector)).await?;
         Ok(Self { socket })
     }
 

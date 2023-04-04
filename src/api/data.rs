@@ -1,3 +1,4 @@
+#![allow(clippy::enum_glob_use)]
 use std::{fmt::Display, str::FromStr};
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -177,6 +178,7 @@ pub enum Champion {
 impl FromStr for Champion {
     type Err = &'static str;
 
+    #[allow(clippy::too_many_lines)]
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         use Champion::*;
         let normalized: String = s.chars().filter(|c| c.is_alphanumeric()).collect();
@@ -351,6 +353,7 @@ impl FromStr for Champion {
 }
 
 impl Display for Champion {
+    #[allow(clippy::too_many_lines)]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use Champion::*;
         let name = match self {
@@ -553,6 +556,7 @@ pub enum SummonerSpell {
 }
 
 impl Display for SummonerSpell {
+    #[allow(clippy::match_same_arms)]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use SummonerSpell::*;
         let name = match self {

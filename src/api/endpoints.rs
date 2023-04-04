@@ -1,6 +1,15 @@
+#![allow(clippy::missing_errors_doc)]
 use reqwest::Method;
 
-use crate::{api::types::*, client::Api, client::ApiResult};
+use crate::{
+    api::types::{
+        LolActiveBoostsActiveBoosts, LolChampSelectChampGridChampion,
+        LolChampSelectChampSelectAction, LolChampSelectChampSelectPlayerSelection,
+        LolChatFriendResource,
+    },
+    client::Api,
+    client::ApiResult,
+};
 
 const NO_BODY: Option<&str> = None;
 

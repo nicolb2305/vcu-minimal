@@ -1,3 +1,4 @@
+#![allow(clippy::missing_errors_doc)]
 use base64::{engine::general_purpose, Engine as _};
 use lazy_static::lazy_static;
 use regex::Regex;

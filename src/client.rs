@@ -1,3 +1,4 @@
+#![allow(clippy::missing_errors_doc)]
 use reqwest::{
     header::{HeaderMap, HeaderValue, InvalidHeaderValue},
     Certificate, Error as ReqwestError,

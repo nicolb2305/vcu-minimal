@@ -1,3 +1,4 @@
+#![allow(clippy::struct_excessive_bools)]
 use std::{collections::HashMap, vec};
 
 use serde::{Deserialize, Serialize};
@@ -123,6 +124,7 @@ pub struct LolChampSelectChampSelectSession {
 pub struct GameId(u64);
 
 impl LolChampSelectChampSelectSession {
+    #[must_use]
     pub fn champions(&self) -> Vec<Vec<Champion>> {
         let my_team: Vec<_> = self.my_team.iter().map(|x| x.champion).collect();
         let their_team: Vec<_> = self.their_team.iter().map(|x| x.champion).collect();
