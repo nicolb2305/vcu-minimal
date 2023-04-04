@@ -40,43 +40,43 @@ impl ApiClient {
         &self,
         method: reqwest::Method,
         endpoint: &str,
-        body: Option<U>,
-    ) -> ApiResult<T>
+        body: T,
+    ) -> ApiResult<U>
     where
-        T: for<'a> Deserialize<'a>,
-        U: Serialize,
+        T: Serialize,
+        U: for<'a> Deserialize<'a>,
     {
-        let mut request = self.reqwest_client.request(
-            method,
-            format!("https://127.0.0.1:{}{}", self.port, endpoint),
-        );
-
-        if let Some(b) = body {
-            request = request.json(&b);
-        }
-
-        Ok(request.send().await?.json().await?)
+        Ok(self
+            .reqwest_client
+            .request(
+                method,
+                format!("https://127.0.0.1:{}{}", self.port, endpoint),
+            )
+            .json(&body)
+            .send()
+            .await?
+            .json()
+            .await?)
     }
 
-    pub async fn request<U>(
+    pub async fn request<T>(
         &self,
         method: reqwest::Method,
         endpoint: &str,
-        body: Option<U>,
+        body: T,
     ) -> ApiResult<()>
     where
-        U: Serialize,
+        T: Serialize,
     {
-        let mut request = self.reqwest_client.request(
-            method,
-            format!("https://127.0.0.1:{}{}", self.port, endpoint),
-        );
+        self.reqwest_client
+            .request(
+                method,
+                format!("https://127.0.0.1:{}{}", self.port, endpoint),
+            )
+            .json(&body)
+            .send()
+            .await?;
 
-        if let Some(b) = body {
-            request = request.json(&b);
-        }
-
-        request.send().await?;
         Ok(())
     }
 }
