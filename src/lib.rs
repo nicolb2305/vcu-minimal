@@ -1,4 +1,4 @@
 pub mod api;
 pub mod client;
-pub mod utils;
+mod utils;
 pub mod ws;

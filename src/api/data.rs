@@ -1,5 +1,5 @@
 #![allow(clippy::enum_glob_use)]
-use std::{fmt::Display, str::FromStr};
+use core::{fmt::Display, str::FromStr};
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
 

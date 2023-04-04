@@ -4,12 +4,9 @@ use futures_util::StreamExt;
 use tokio::sync::mpsc::{self, Sender};
 use tokio_tungstenite::tungstenite::Message;
 use vcu_minimal::{
-    api::{
-        data::Champion,
-        types::LolChampSelectChampSelectAction,
-        ws_types::{SubscriptionType, WebSocketEvent, WebSocketResponse},
-    },
+    api::{data::Champion, types::LolChampSelectChampSelectAction},
     client::Api,
+    ws::types::{SubscriptionType, WebSocketEvent, WebSocketResponse},
     ws::WebSocketClient,
 };
 

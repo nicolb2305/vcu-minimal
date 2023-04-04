@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 
-use super::types::LolChampSelectChampSelectSession;
+use crate::api::types::LolChampSelectChampSelectSession;
 
 #[derive(Debug, Default, Clone)]
 #[non_exhaustive]

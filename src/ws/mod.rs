@@ -1,4 +1,5 @@
 #![allow(clippy::missing_errors_doc)]
+pub mod types;
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{SinkExt, StreamExt};
 use tokio::net::TcpStream;
@@ -6,8 +7,8 @@ use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::http::HeaderValue;
 use tokio_tungstenite::{tungstenite::Message, MaybeTlsStream, WebSocketStream};
 
-use crate::api::ws_types::SubscriptionType;
 use crate::utils::port_and_auth;
+use crate::ws::types::SubscriptionType;
 
 pub struct WSClient {
     pub write: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
@@ -28,7 +29,7 @@ impl WSClient {
     pub async fn connect(events: Events) -> Result<Self, Error> {
         let (port, auth) = port_and_auth()?;
 
-        let cert = native_tls::Certificate::from_pem(include_bytes!("../riotgames.pem"))?;
+        let cert = native_tls::Certificate::from_pem(include_bytes!("../../riotgames.pem"))?;
         let tls = native_tls::TlsConnector::builder()
             .add_root_certificate(cert)
             .build()?;
@@ -85,7 +86,7 @@ impl WebSocketClient {
     pub async fn new() -> Result<Self, Error> {
         let (port, auth) = port_and_auth()?;
 
-        let cert = native_tls::Certificate::from_pem(include_bytes!("../riotgames.pem"))?;
+        let cert = native_tls::Certificate::from_pem(include_bytes!("../../riotgames.pem"))?;
         let tls = native_tls::TlsConnector::builder()
             .add_root_certificate(cert)
             .build()?;

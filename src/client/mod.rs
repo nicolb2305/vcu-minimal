@@ -1,10 +1,11 @@
 #![allow(clippy::missing_errors_doc)]
+use core::fmt::Display;
 use reqwest::{
     header::{HeaderMap, HeaderValue, InvalidHeaderValue},
     Certificate, Error as ReqwestError,
 };
 use serde::{Deserialize, Serialize};
-use std::{error::Error, fmt::Display};
+use std::error::Error;
 
 use crate::utils::port_and_auth;
 
@@ -25,7 +26,7 @@ impl Api {
             HeaderValue::from_str(format!("Basic {auth}").as_str())?,
         );
 
-        let cert = Certificate::from_pem(include_bytes!("../riotgames.pem"))?;
+        let cert = Certificate::from_pem(include_bytes!("../../riotgames.pem"))?;
         let reqwest_client = reqwest::ClientBuilder::new()
             .add_root_certificate(cert)
             .default_headers(headers)
