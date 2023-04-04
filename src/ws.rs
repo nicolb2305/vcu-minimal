@@ -32,12 +32,12 @@ impl WSClient {
             .add_root_certificate(cert)
             .build()?;
         let connector = tokio_tungstenite::Connector::NativeTls(tls);
-        let mut url = format!("wss://127.0.0.1:{}", port).into_client_request()?;
+        let mut url = format!("wss://127.0.0.1:{port}").into_client_request()?;
         {
             let headers = url.headers_mut();
             headers.insert(
                 "Authorization",
-                HeaderValue::from_str(format!("Basic {}", auth).as_str())?,
+                HeaderValue::from_str(format!("Basic {auth}").as_str())?,
             );
         }
 
@@ -58,7 +58,7 @@ impl WSClient {
 
     pub async fn subscribe(&mut self, event: String) -> Result<(), Error> {
         self.write
-            .send(Message::text(format!("[5, {}]", event)))
+            .send(Message::text(format!("[5, {event}]")))
             .await?;
 
         Ok(())
@@ -66,7 +66,7 @@ impl WSClient {
 
     pub async fn unsubscribe(&mut self, event: String) -> Result<(), Error> {
         self.write
-            .send(Message::text(format!("[6, {}]", event)))
+            .send(Message::text(format!("[6, {event}]")))
             .await?;
 
         Ok(())
@@ -81,24 +81,24 @@ pub struct WebSocketClient {
 }
 
 impl WebSocketClient {
-    pub async fn new() -> Self {
-        let (port, auth) = port_and_auth().unwrap();
+    pub async fn new() -> Result<Self, Error> {
+        let (port, auth) = port_and_auth()?;
 
-        let cert = native_tls::Certificate::from_pem(include_bytes!("../riotgames.pem")).unwrap();
+        let cert = native_tls::Certificate::from_pem(include_bytes!("../riotgames.pem"))?;
         let tls = native_tls::TlsConnector::builder()
             .add_root_certificate(cert)
             .build()
             .unwrap();
         let connector = tokio_tungstenite::Connector::NativeTls(tls);
 
-        let mut url = format!("wss://127.0.0.1:{}", port)
+        let mut url = format!("wss://127.0.0.1:{port}")
             .into_client_request()
             .unwrap();
         {
             let headers = url.headers_mut();
             headers.insert(
                 "Authorization",
-                HeaderValue::from_str(format!("Basic {}", auth).as_str()).unwrap(),
+                HeaderValue::from_str(format!("Basic {auth}").as_str())?,
             );
         }
 
@@ -106,12 +106,12 @@ impl WebSocketClient {
             tokio_tungstenite::connect_async_tls_with_config(url, None, Some(connector))
                 .await
                 .unwrap();
-        Self { socket }
+        Ok(Self { socket })
     }
 
     pub async fn subscribe(&mut self, event: SubscriptionType) -> Result<(), Error> {
         self.socket
-            .send(Message::text(format!(r#"[5, "{}"]"#, event)))
+            .send(Message::text(format!(r#"[5, "{event}"]"#)))
             .await?;
 
         Ok(())

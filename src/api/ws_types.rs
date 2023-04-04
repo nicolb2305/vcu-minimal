@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 
-use super::api_types::LolChampSelectChampSelectSession;
+use super::types::LolChampSelectChampSelectSession;
 
 #[derive(Debug, Default, Clone)]
 #[non_exhaustive]
@@ -20,7 +20,7 @@ impl Display for SubscriptionType {
             Self::All => "OnJsonApiEvent",
             Self::LolChampSelectV1Session => "OnJsonApiEvent_lol-champ-select_v1_session",
         };
-        write!(f, "{}", text)
+        write!(f, "{text}")
     }
 }
 

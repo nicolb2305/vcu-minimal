@@ -520,7 +520,7 @@ impl Display for Champion {
             None => "None",
             Unknown => "Unknown",
         };
-        write!(f, "{}", name)
+        write!(f, "{name}")
     }
 }
 
@@ -549,7 +549,7 @@ pub enum SummonerSpell {
     OdysseyTemp2 = 52,
     Placeholder = 54,
     PlaceholderAndSmite = 55,
-    PrimalSmite = 4294967295,
+    PrimalSmite = 4_294_967_295,
 }
 
 impl Display for SummonerSpell {
@@ -573,6 +573,6 @@ impl Display for SummonerSpell {
             PrimalSmite => "Primal Smite",
             _ => "",
         };
-        write!(f, "{}", name)
+        write!(f, "{name}")
     }
 }

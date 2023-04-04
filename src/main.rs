@@ -5,11 +5,11 @@ use tokio::sync::mpsc::{self, Sender};
 use tokio_tungstenite::tungstenite::Message;
 use vcu_minimal::{
     api::{
-        api_types::LolChampSelectChampSelectAction,
         data::Champion,
+        types::LolChampSelectChampSelectAction,
         ws_types::{SubscriptionType, WebSocketEvent, WebSocketResponse},
     },
-    client::ApiClient,
+    client::Api,
     ws::WebSocketClient,
 };
 
@@ -17,7 +17,7 @@ fn spawn_client_listener(mut client: WebSocketClient, tx: Sender<WebSocketRespon
     let async_block = async move {
         while let Some(Ok(Message::Text(v))) = client.socket.next().await {
             if let Ok(val) = serde_json::from_str::<WebSocketEvent>(&v) {
-                tx.send(val.data).await.unwrap()
+                tx.send(val.data).await.unwrap();
             }
         }
     };
@@ -46,7 +46,11 @@ fn process_client_message(msg: WebSocketResponse) -> Vec<LolChampSelectChampSele
                 .data
                 .champions()
                 .iter()
-                .map(|x| x.iter().map(|y| y.to_string()).collect::<Vec<_>>())
+                .map(|x| {
+                    x.iter()
+                        .map(std::string::ToString::to_string)
+                        .collect::<Vec<_>>()
+                })
                 .collect::<Vec<_>>();
             dbg!(&val.data.bans);
             dbg!(picks);
@@ -57,7 +61,7 @@ fn process_client_message(msg: WebSocketResponse) -> Vec<LolChampSelectChampSele
 }
 
 async fn process_stdin_message(
-    client: &ApiClient,
+    client: &Api,
     msg: &str,
     actions: &[LolChampSelectChampSelectAction],
 ) {
@@ -97,7 +101,7 @@ async fn process_stdin_message(
 
 #[tokio::main]
 async fn main() {
-    let client = ApiClient::new().unwrap();
+    let client = Api::new().unwrap();
     dbg!(client
         .get_lol_champ_select_v1_all_grid_champions()
         .await
@@ -106,7 +110,7 @@ async fn main() {
     let (tx_ws, mut rx_ws) = mpsc::channel(5);
     let (tx_stdin, mut rx_stdin) = mpsc::channel(5);
 
-    let mut ws_client = WebSocketClient::new().await;
+    let mut ws_client = WebSocketClient::new().await.unwrap();
     ws_client
         .subscribe(SubscriptionType::LolChampSelectV1Session)
         .await
@@ -124,7 +128,7 @@ async fn main() {
                 // dbg!(&actions);
             },
             Some(champion_name) = rx_stdin.recv() => {
-                process_stdin_message(&client, &champion_name, &actions).await
+                process_stdin_message(&client, &champion_name, &actions).await;
             }
         }
     }
